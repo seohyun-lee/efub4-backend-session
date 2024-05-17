@@ -32,6 +32,9 @@ public class Comment extends BaseTimeEntity {
     @JoinColumn(name = "post_id", updatable = false) /* FK 칼럼 지정 */
     private Post post;
 
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<CommentHeart> commentHeartList = new ArrayList<>();
+
     /* 빌더 패턴 이용 */
     @Builder
     public Comment(String content, Account writer, Post post){
@@ -39,4 +42,6 @@ public class Comment extends BaseTimeEntity {
         this.writer = writer;
         this.post = post;
     }
+
+    public void updateComment(String content) { this.content = content; }
 }

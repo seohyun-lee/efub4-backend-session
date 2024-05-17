@@ -73,10 +73,18 @@ public class PostController {
     }
 
     /* 좋아요 등록 */
-//    public String createPostHeart(@PathVariable final Long postId, @RequestBody final HeartRequestDto requestDto) {
-//    }
+    @PostMapping("/{postId}/hearts")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public String createPostHeart(@PathVariable final Long postId, @RequestBody final HeartRequestDto requestDto) {
+        postHeartService.create(postId, requestDto.getAccountId());
+        return "좋아요를 눌렀습니다.";
+    }
 
     /* 좋아요 삭제 */
-//    public String deletePostHeart(@PathVariable final Long postId, @RequestParam final Long accountId) {
-//    }
+    @DeleteMapping("/{postId}/hearts")
+    @ResponseStatus(value = HttpStatus.OK)
+    public String deletePostHeart(@PathVariable final Long postId, @RequestParam final Long accountId) {
+        postHeartService.delete(postId, accountId);
+        return "좋아요가 취소되었습니다.";
+    }
 }
