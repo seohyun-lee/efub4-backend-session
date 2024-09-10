@@ -24,7 +24,7 @@ jobs:
           mkdir ./blog/src/main/resources 
           cd ./blog/src/main/resources
           touch ./application.yml
-          echo "${{ secrets.APPLICATION_YML }}" > ./application.yml
+          echo "${{ secrets.APPLICATION }}" > ./application.yml
 
       - name: Gradle Caching
         uses: actions/cache@v3
