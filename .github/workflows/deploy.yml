@@ -2,22 +2,12 @@ name: Deploy to Amazon EC2
 
 on:
   push:
-    branches: [ "develop" ]
-
-env:
-  AWS_REGION: ap-northeast-2
-  S3_BUCKET_NAME: efub-week10-github-actions-s3-bucket
-  CODE_DEPLOY_APPLICATION_NAME: efub-week10-codedeploy-app
-  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: efub-week10-codedeploy-deployment-group
-
-permissions:
-  contents: read
+    branches: [ "week11" ]
 
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - name: Checkout
@@ -26,40 +16,58 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
           java-version: '17'
+          distribution: 'zulu'
 
       - name: make application.yml
         run: |
-          mkdir ./src/main/resources 
-          cd ./src/main/resources
+          mkdir ./blog/src/main/resources 
+          cd ./blog/src/main/resources
           touch ./application.yml
           echo "${{ secrets.APPLICATION_YML }}" > ./application.yml
 
+      - name: Gradle Caching
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - name: Build with Gradle
         run: |
+          cd ./blog
           chmod +x ./gradlew
           ./gradlew build -x test
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Upload to AWS S3
-        run: |
-          aws deploy push \
-            --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
-            --ignore-hidden-files \
-            --s3-location s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip \
-            --source .
 
-      - name: Deploy to AWS EC2 from S3
-        run: |
-          aws deploy create-deployment \
-            --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
-            --deployment-config-name CodeDeployDefault.AllAtOnce \
-            --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
-            --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip
+      # Docker 이미지 빌드 및 푸시
+      - name: Docker build & push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./blog
+          file: ./blog/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_REPO }}:latest
+
+      # 서버에 배포
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          envs: GITHUB_SHA
+          script: |
+            sudo docker rm -f $(sudo docker ps -qa)
+            sudo docker pull ${{ secrets.DOCKER_REPO }}:lastest
+            sudo docker run -d -p 8080:8080 ${{ secrets.DOCKER_REPO }}:latest
+            sudo docker image prune -f
