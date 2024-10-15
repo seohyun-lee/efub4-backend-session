@@ -32,8 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @SpringBootTest  // 테스트용 애플리케이션 컨텍스트
-@AutoConfigureMockMvc  // MockMvc 생성 및 자동 구성
-@Sql(scripts = "/data.sql") // 테스트 데이터 파일 자동 실행
+@AutoConfigureMockMvc
+@Sql(scripts = "/data.sql")
 @ActiveProfiles("test")
 @ContextConfiguration(classes = BlogApplication.class)
 @TestPropertySource(locations = "classpath:application-test.yml")
@@ -54,7 +54,6 @@ public class AccountControllerTest {
     public void mockMvcSetUp(){
         this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
                 .build();
-       // accountRepository.deleteAll();;
     }
 
 
@@ -65,27 +64,24 @@ public class AccountControllerTest {
         /* given */
         final String url = "/accounts";
         final String email = "efub@ewhain.net";
-        final String password = "!efub1234!";
-        final String nickname = "efubBack";
-        final SignUpRequestDto requestDto = createDefaultSignUpRequestDto(email,password,nickname);
+        final String password = "efub1234!";
+        final String nickname ="efubBack";
+        final SignUpRequestDto requestDto = createDefaultSignUpRequestDto(email , password , nickname);
 
         /* when */
         final String requestBody = objectMapper.writeValueAsString(requestDto); /* 객체를 JSON으로 직렬화 */
 
         ResultActions resultActions = mockMvc.perform(post(url)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody)); // 설정 내용으로 요청 전송
+                        .content(requestBody)); // 설정 내용으로 요청 전송
 
         /* then */
         resultActions
-                .andExpect(status().isCreated()) // 지정한 응답 코드 반환
-                .andExpect(jsonPath("$.accountId").isNotEmpty()) // 응답 dto의 accountId가 null 아 아니라면 통과
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.accountId").isNotEmpty())
                 .andExpect(jsonPath("$.email").value(email))
                 .andExpect(jsonPath("$.nickname").value(nickname));
-
     }
-
-
 
 
     private SignUpRequestDto createDefaultSignUpRequestDto(String email,String password, String nickname){

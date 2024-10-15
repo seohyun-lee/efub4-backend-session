@@ -33,6 +33,21 @@ public class AccountController {
         return AccountResponseDto.from(findAccount);
     }
 
+    /* Redis에서 id로 이메일 조회 */
+    @GetMapping("/mail/{accoundId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public String getEmailByIdfromRedis(@PathVariable Long accoundId){
+        return accountService.findEmailByIdfromRedis(accoundId);
+    }
+
+    /* Mongodb에서  id로 닉네임 조회 */
+    @GetMapping("/mongod/{accoundId}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public String getNicknameByIdfromMongod(@PathVariable Long accoundId){
+        return accountService.findNicknameByIdfromMongod(accoundId);
+    }
+
+
     /* 계정 프로필 수정 */
     @PatchMapping("/profile/{accountId}")
     @ResponseStatus(value = HttpStatus.OK)
