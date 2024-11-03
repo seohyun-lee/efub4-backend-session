@@ -9,14 +9,17 @@ import java.util.Map;
 public class OAuth2UserInfo {
     private Map<String, Object> attributes;
 
+    // OAuth2UserInfo 객체 생성자
     public OAuth2UserInfo(Map<String, Object> attributes) {
         this.attributes = attributes;
     }
 
+    // 사용자 닉네임 반환 메서드
     public String getNickname() {
         return (String) attributes.get("name");
     }
 
+    // 사용자 이메일 반환 메서드
     public String getEmail() {
         return (String) attributes.get("email");
     }

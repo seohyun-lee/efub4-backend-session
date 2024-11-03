@@ -38,7 +38,7 @@ public class TokenProvider {
 
     /**
      * AccessToken 생성 메소드
-     * 사용자의 이메일과 권한 정보를 포함해 AccessToken을 생성
+     * 사용자 이메일 정보를 포함해 AccessToken 생성
      */
     public String createAccessToken(Account account){
         Date now = new Date();
