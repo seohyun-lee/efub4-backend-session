@@ -1,4 +1,4 @@
-package efub.session.blog.global.entity;
+package efub.session.blog.global.config;
 
 
 import org.springframework.beans.factory.annotation.Value;
