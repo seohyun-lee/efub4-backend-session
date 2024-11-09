@@ -3,9 +3,9 @@ package efub.session.blog.post.service;
 import efub.session.blog.account.domain.Account;
 import efub.session.blog.account.service.AccountService;
 import efub.session.blog.exception.CustomDeleteException;
-import efub.session.blog.exception.ErrorCode;
 import efub.session.blog.post.domain.Post;
 import efub.session.blog.post.dto.PostRequestDto;
+import efub.session.blog.post.dto.PostResponseDto;
 import efub.session.blog.post.repository.PostRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -64,5 +64,11 @@ public class PostService {
             throw new CustomDeleteException(PERMISSION_REJECTED_USER);
         }
         postRepository.delete(post);
+    }
+
+    public List<PostResponseDto> searchPost(String keyword, String writerNickname){
+        List<PostResponseDto> responseDtoList = postRepository.search(keyword,writerNickname).stream().map(post ->
+            PostResponseDto.from(post, post.getAccount().getNickname())).toList();
+        return responseDtoList;
     }
 }

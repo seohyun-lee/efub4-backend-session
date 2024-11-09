@@ -88,4 +88,12 @@ public class PostController {
         return "좋아요가 취소되었습니다.";
     }
 
+    /* 게시글 검색 */
+    @GetMapping("/search")
+    @ResponseStatus(value = HttpStatus.OK)
+    public List<PostResponseDto> searchPost(@RequestParam(value = "keyword", required = false) final String keyword,
+        @RequestParam(value = "writer", required = false) final String writerNickname){
+        return postService.searchPost(keyword, writerNickname);
+    }
+
 }

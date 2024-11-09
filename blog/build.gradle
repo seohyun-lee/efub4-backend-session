@@ -1,3 +1,10 @@
+buildscript {
+	ext {
+		queryDslVersion = "5.0.0" //QueryDSL의 버전을 관리하기 위한 변수 정의
+	}
+}
+
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.2.4'
@@ -45,6 +52,16 @@ dependencies {
 
 	/* OAuth2 */
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+	/* QueryDSL */
+	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
+
+	annotationProcessor(
+			"jakarta.persistence:jakarta.persistence-api",          //Jakarta Persistence API를 위한 어노테이션 프로세서
+			"jakarta.annotation:jakarta.annotation-api",            //Jakarta Annotation API를 위한 어노테이션 프로세서
+			"com.querydsl:querydsl-apt:${queryDslVersion}:jakarta"  //Entity 클래스들에 대해 QueryDSL의 Q타입 클래스를 자동 생성
+	)
+
 }
 
 jar {
@@ -54,3 +71,14 @@ jar {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+sourceSets {  //Gradle에서 소스 코드를 찾는 경로를 지정하는 역할
+
+	main {
+		java { //QueryDSL이 생성한 Q타입 클래스들을 build/generated 디렉토리에 저장하도록 설정
+			srcDirs = ["$projectDir/src/main/java", "$projectDir/build/generated"]
+		}
+	}
+}
+
+compileJava.dependsOn('clean') //CompileJava 작업이 clean 작업에 의존하도록 설정
